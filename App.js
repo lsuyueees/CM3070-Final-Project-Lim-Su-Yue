@@ -4,7 +4,10 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Button } from '@react-navigation/elements';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Hr from 'react-native-hr-component';
+
 import WeatherAPI from './weatherAPI';
+import SOSList from './sosList';
 
 const Tab = createBottomTabNavigator();
 
@@ -103,21 +106,17 @@ function HomeScreen() {
 function WeatherScreen() {
 
    return (
-     <View style={{ flex: 1 }}>
-      <WeatherAPI mapStyle={{ height: '100%', width: '100%' }}/>
+    <View style={{ flex: 1 }}>
+      <WeatherAPI mapStyle={{ flex: 1 }}/>
     </View>
   );
 }
 
 function SOSScreen() {
-  const navigation = useNavigation();
-
+  
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>SOS Screen</Text>
-      <Button onPress={() => navigation.navigate('Home')}>
-        Go to Home
-      </Button>
+    <View style={{ flex: 1 }}>
+      <SOSList />
     </View>
   );
 }
@@ -159,4 +158,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center'
   },
+  lineStyle:{
+    borderBottomColor: 'black',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    width: '100%',
+   }
 });

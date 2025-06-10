@@ -26,6 +26,7 @@
     "react-native-paper": "4.9.2",
     "react-native-screens": "~4.4.0",
     "@react-navigation/native": "7.1.10",
+    "react-native-hr-component": "*",
     "react-native-vector-icons": "*",
     "@react-navigation/elements": "*",
     "@react-navigation/bottom-tabs": "*",
