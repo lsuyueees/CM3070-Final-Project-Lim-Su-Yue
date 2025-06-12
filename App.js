@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, RefreshControl } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Button } from '@react-navigation/elements';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import Hr from 'react-native-hr-component';
 
-import WeatherAPI from './weatherAPI';
-import SOSList from './sosList';
+import WeatherAPI from './jsFiles/weatherAPI';
+import SOSList from './jsFiles/sosList';
+import Home from './jsFiles/home';
+import ScenarioQuiz from './jsFiles/scenarioQuiz';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,6 +35,7 @@ function MyTabs() {
         name="1ReadySG" 
         component={HomeScreen} 
         options={{
+            lazy: false,
             tabBarLabel: 'Home',
             tabBarIcon: ({ color }) => (
               <FontAwesome5 name="home" size={20} style={{ color }} />
@@ -44,6 +46,7 @@ function MyTabs() {
         name="Weather" 
         component={WeatherScreen}
         options={{
+            lazy: false,
             tabBarLabel: 'Weather', 
             tabBarIcon: ({ color }) => (
               <FontAwesome5 name="cloud-sun-rain" size={20} style={{ color }} />
@@ -54,6 +57,7 @@ function MyTabs() {
         name="SOS" 
         component={SOSScreen}
         options={{
+            lazy: false,
             tabBarLabel: 'SOS',
             tabBarLabelStyle: {
               fontSize: 15,
@@ -68,6 +72,7 @@ function MyTabs() {
         name="Learn" 
         component={LearnScreen}
         options={{
+            lazy: false,
             tabBarLabel: 'Learn', 
             tabBarIcon: ({ color }) => (
               <FontAwesome5 name="book-reader" size={20} style={{ color }} />
@@ -78,6 +83,7 @@ function MyTabs() {
         name="More" 
         component={MoreScreen}
         options={{
+            lazy: false,
             tabBarLabel: 'More', 
             tabBarIcon: ({ color }) => (
               <FontAwesome5 name="ellipsis-h" size={20} style={{ color }} />
@@ -92,13 +98,8 @@ function HomeScreen() {
   const navigation = useNavigation();
 
   return (
-    <View style={styles.container}>
-      <Text style={{ fontWeight: 'bold', marginTop: 20 }}>Here's what's happening around you</Text>
-      <WeatherAPI mapStyle={{ height: 300, width: '100%', padding: 20 }}/>
-      <Button onPress={() => navigation.navigate('Weather')} style={{ width: 200, left: 80 }}>
-        View Weather
-      </Button>
-      <Text style={{ fontWeight: 'bold', alignSelf: 'left', padding: 20, marginTop: 20 }}>Start Learning Today!</Text>
+    <View style={{ flex: 1 }}>
+      <Home />
     </View>
   );
 }
@@ -125,11 +126,8 @@ function LearnScreen() {
   const navigation = useNavigation();
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Learn Screen</Text>
-      <Button onPress={() => navigation.navigate('1ReadySG')}>
-        Go to Home
-      </Button>
+    <View style={{ flex: 1 }}>
+      <ScenarioQuiz />
     </View>
   );
 }
@@ -158,9 +156,4 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center'
   },
-  lineStyle:{
-    borderBottomColor: 'black',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    width: '100%',
-   }
 });
