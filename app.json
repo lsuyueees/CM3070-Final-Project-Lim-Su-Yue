@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "cm3070-final-project",
-    "slug": "snack-487b0fa0-51d4-44c5-a3f4-7dc854527613",
+    "name": "finalsCodes",
+    "slug": "finalsCodes",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,16 +13,30 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.suyueees.finalsCodes",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.suyueees.finalsCodes"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ae851210-284d-4a93-9262-ea3474189ffa"
+      }
+    },
+    "plugins": [
+      "expo-sqlite"
+    ]
   }
 }

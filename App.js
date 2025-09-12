@@ -1,22 +1,32 @@
-import React, { useState, useEffect } from 'react'
-import { StyleSheet, Text, View, ScrollView, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react'
+import { StyleSheet, Text, View, ScrollView, RefreshControl, Platform } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Button } from '@react-navigation/elements';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { auth, db } from './firebaseConfig';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import MoreStackNavigation from './jsFiles/moreStackNavigation';
 
+import AuthScreen from './jsFiles/authentication';
 import WeatherAPI from './jsFiles/weatherAPI';
 import SOSList from './jsFiles/sosList';
 import Home from './jsFiles/home';
 import ScenarioQuiz from './jsFiles/scenarioQuiz';
+import MoreMenu from './jsFiles/more';
+import Profile from './jsFiles/profile';
+import QuizStackNavigation from './jsFiles/quizStackNavigation';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 function MyTabs() {
   return (
     <Tab.Navigator
-      screenOptions = {{
-        headerStyle: { 
+      screenOptions={{
+        headerStyle: {
           backgroundColor: '#0072A3',
           height: 130
         },
@@ -27,48 +37,48 @@ function MyTabs() {
         },
         tabBarLabelPosition: 'below-icon',
         tabBarStyle: {
-          height: 80, 
+          height: 80,
         },
       }}
     >
-      <Tab.Screen 
-        name="1ReadySG" 
-        component={HomeScreen} 
+      <Tab.Screen
+        name="1ReadySG"
+        component={HomeScreen}
         options={{
-            lazy: false,
-            tabBarLabel: 'Home',
-            tabBarIcon: ({ color }) => (
-              <FontAwesome5 name="home" size={20} style={{ color }} />
-            ),
-          }}
-        />
-      <Tab.Screen 
-        name="Weather" 
+          lazy: false,
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="home" size={20} style={{ color }} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Weather"
         component={WeatherScreen}
         options={{
-            lazy: false,
-            tabBarLabel: 'Weather', 
-            tabBarIcon: ({ color }) => (
-              <FontAwesome5 name="cloud-sun-rain" size={20} style={{ color }} />
-            )
-          }} 
-        />
-      <Tab.Screen 
-        name="SOS" 
+          lazy: false,
+          tabBarLabel: 'Weather',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="cloud-sun-rain" size={20} style={{ color }} />
+          )
+        }}
+      />
+      <Tab.Screen
+        name="SOS"
         component={SOSScreen}
         options={{
-            lazy: false,
-            tabBarLabel: 'SOS',
-            tabBarLabelStyle: {
-              fontSize: 15,
-              color:"red",
-            },
-            tabBarIcon: ({ color }) => (
-              <FontAwesome5 name="exclamation" size={20} style={{ color:"red" }} />
-            )
-          }} 
-        />
-      <Tab.Screen 
+          lazy: false,
+          tabBarLabel: 'SOS',
+          tabBarLabelStyle: {
+            fontSize: 15,
+            color: "red",
+          },
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="exclamation" size={20} style={{ color: "red" }} />
+          )
+        }}
+      />
+      {/* <Tab.Screen 
         name="Learn" 
         component={LearnScreen}
         options={{
@@ -78,8 +88,20 @@ function MyTabs() {
               <FontAwesome5 name="book-reader" size={20} style={{ color }} />
             )
           }} 
-        />
-      <Tab.Screen 
+        /> */}
+      <Tab.Screen
+        name="Learn"
+        component={QuizStackNavigation}
+        options={{
+          headerShown: false,
+          lazy: false,
+          tabBarLabel: 'Learn',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="book-reader" size={20} style={{ color }} />
+          )
+        }}
+      />
+      {/* <Tab.Screen 
         name="More" 
         component={MoreScreen}
         options={{
@@ -89,7 +111,19 @@ function MyTabs() {
               <FontAwesome5 name="ellipsis-h" size={20} style={{ color }} />
             )
           }} 
-        />
+        /> */}
+      <Tab.Screen
+        name="More"
+        component={MoreStackNavigation}
+        options={{
+          headerShown: false,
+          lazy: false,
+          tabBarLabel: 'More',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="ellipsis-h" size={20} style={{ color }} />
+          )
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -106,15 +140,15 @@ function HomeScreen() {
 
 function WeatherScreen() {
 
-   return (
+  return (
     <View style={{ flex: 1 }}>
-      <WeatherAPI mapStyle={{ flex: 1 }}/>
+      <WeatherAPI mapStyle={{ flex: 1 }} />
     </View>
   );
 }
 
 function SOSScreen() {
-  
+
   return (
     <View style={{ flex: 1 }}>
       <SOSList />
@@ -136,17 +170,99 @@ function MoreScreen() {
   const navigation = useNavigation();
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>More Screen</Text>
-      <Button onPress={() => navigation.navigate('1ReadySG')}>Go to Home</Button>
+    <View style={{ flex: 1 }}>
+      <MoreMenu />
     </View>
   );
 }
 
+// export const setupDatabase = () => {
+//   db.transaction(tx => {
+//     tx.executeSql(
+//       `CREATE TABLE IF NOT EXISTS quizzes (
+//         id TEXT PRIMARY KEY NOT NULL,
+//         completed INTEGER,
+//         score INTEGER
+//       );`
+//     );
+
+//     tx.executeSql(
+//       `CREATE TABLE IF NOT EXISTS achievements (
+//         id TEXT PRIMARY KEY NOT NULL,
+//         title TEXT
+//       );`
+//     );
+
+//     tx.executeSql(
+//       `CREATE TABLE IF NOT EXISTS checklist (
+//         id INTEGER PRIMARY KEY AUTOINCREMENT,
+//         item TEXT,
+//         completed INTEGER
+//       );`
+//     );
+
+//     tx.executeSql(
+//       `CREATE TABLE IF NOT EXISTS notification_settings (
+//         id TEXT PRIMARY KEY NOT NULL,
+//         alertsEnabled INTEGER
+//       );`
+//     );
+//   });
+// };
+
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [bootstrapped, setBootstrapped] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async(user) => {
+      setUser(user);
+      setLoading(false);
+
+      if (user) {
+        try {
+          const ref = doc(db, 'users', u.uid);
+          const snap = await getDoc(ref);
+          if (!snap.exists()) {
+            await setDoc(ref, {
+              email: u.email ?? '',
+              username: '',
+              quiz1: false, quiz1Score: 0,
+              quiz2: false, quiz2Score: 0,
+              quiz3: false, quiz3Score: 0,
+              quiz4: false, quiz4Score: 0,
+              alertsEnabled: false,
+              checklist: {},
+              createdAt: serverTimestamp(),
+              lastLoginAt: serverTimestamp(),
+            }, { merge: true });
+          } else {
+            await setDoc(ref, { lastLoginAt: serverTimestamp() }, { merge: true });
+          }
+        } catch (e) {
+          console.log('Ensure user doc error:', e);
+        }
+      }
+
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) return null;
+
   return (
     <NavigationContainer>
-      <MyTabs />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {user ? (
+          <>
+            <Stack.Screen name="Main" component={MyTabs} />
+          </>
+        ) : (
+          <Stack.Screen name="Authentication" component={AuthScreen} />
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
