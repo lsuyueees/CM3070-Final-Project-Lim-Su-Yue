@@ -4,16 +4,16 @@ import { useNavigation } from '@react-navigation/native';
 import { auth, db } from '../../firebaseConfig';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
-const Quiz1 = () => {
+const Quiz2 = () => {
   const navigation = useNavigation();
   const [selectedOption, setSelectedOption] = useState(null);
 
-  const correctAnswer = 'B';
+  const correctAnswer = 'A';
 
   const options = [
-    { label: 'A', text: 'Ignore evacuation orders' },
-    { label: 'B', text: 'Prepare an emergency kit in advance' },
-    { label: 'C', text: 'Wait until the last minute to act' },
+    { label: 'A', text: 'Stay away from windows during a storm' },
+    { label: 'B', text: 'Use elevators during evacuation' },
+    { label: 'C', text: 'Ignore flood warnings if it looks sunny' },
   ];
 
   const handleSubmit = async () => {
@@ -41,7 +41,7 @@ const Quiz1 = () => {
       // strict unlocking: set true only if correct, false otherwise
       await setDoc(
         ref,
-        { quiz1: isCorrect, quiz1Score: isCorrect ? 1 : 0 },
+        { quiz2: isCorrect, quiz2Score: isCorrect ? 1 : 0 },
         { merge: true }
       );
 
@@ -49,14 +49,14 @@ const Quiz1 = () => {
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (e) {
-      console.log('Quiz1 save error:', e?.code, e?.message, e);
+      console.log('Quiz2 save error:', e?.code, e?.message, e);
       Alert.alert('Error', e?.message ?? 'Could not save your result.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.question}>What should you do to prepare for a disaster?</Text>
+      <Text style={styles.question}>What should you do when you are indoors during a heavy storm?</Text>
       {options.map((option) => (
         <TouchableOpacity
           key={option.label}
@@ -80,7 +80,7 @@ const Quiz1 = () => {
   );
 };
 
-export default Quiz1;
+export default Quiz2;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
