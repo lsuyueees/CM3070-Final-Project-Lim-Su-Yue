@@ -1,92 +1,100 @@
-import React, { useState, useEffect } from 'react'
-import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react'
+import { StyleSheet, Text, View, ActivityIndicator, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import * as Notifications from 'expo-notifications';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { getDoc, doc } from 'firebase/firestore';
+import { auth, db } from '../firebaseConfig';
 
-const WeatherAPI = ({ mapStyle }) => {
+import { userLocation } from './location';
 
-  const [location, setLocation] = useState(null);
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
+const WeatherAPI = ({ mapStyle, refreshTrigger }) => {
+
+  const { location, permissionGranted, loading } = userLocation();
   const [weatherData, setWeatherData] = useState([]);
   const [timestamp, setTimestamp] = useState(null);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Permission for notifications was denied');
-        return;
-      }
-    })();
-  }, []);
+    // (async () => {
+    //   const { status } = await Location.requestForegroundPermissionsAsync();
+    //   if (status !== 'granted') {
+    //     alert('Permission to access location was denied');
+    //     return;
+    //   }
 
-  const rainfallAlert = async (rainfallValue) => {
-    let message = 'Weather Update: ';
-    if (rainfallValue === 0) {
-      message += 'No rain currently.';
-    } else if (rainfallValue < 10) {
-      message += 'Light rain in your area.';
-    } else if (rainfallValue >= 10 && rainfallValue < 20) {
-      message += 'Moderate rain detected.';
-    } else {
-      message += 'Heavy rain! Stay safe.';
-    }
+    //   const loc = await Location.getCurrentPositionAsync({});
+    //   setLocation(loc.coords);
+    // })();
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Rainfall Alert',
-        body: message,
-      },
-      trigger: null,
-    });
-  };
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Permission to access location was denied');
-        return;
-      }
-
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
-    })();
-
-    const fetchWeather = async () => {
-      try {
-        const response = await fetch('https://api-open.data.gov.sg/v2/real-time/api/rainfall');
-        const json = await response.json();
-
-        const stations = json.data.stations;
-        const readings = json.data.readings?.[0]?.data || [];
-        const readingTimestamp = json.data.readings?.[0]?.timestamp;
-        setTimestamp(readingTimestamp);
-
-        const merged = stations.map((station) => {
-          const reading = readings.find((r) => r.station_id === station.id);
-          return {
-            id: station.id,
-            name: station.name,
-            labelLocation: station.location,
-            value: reading?.value ?? 0,
-          };
-        });
-
-        const userStation = merged.find(station => station.id === 'S111');
-        if (userStation) {
-          rainfallAlert(userStation.value);
-        }
-        
-        setWeatherData(merged);
-      } catch (error) {
-        console.error('Error fetching weather data:', error);
-      }
-    };
-    
     fetchWeather();
-  }, []);
+    const interval = setInterval(fetchWeather, 60000); // Re-fetch every 60 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [refreshTrigger, location]);
+
+  const fetchWeather = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+      const alertsEnabled = userDoc.exists() && userDoc.data().alertsEnabled;
+
+      if (!alertsEnabled) return; // STOP if toggle is off
+
+      const response = await fetch('https://api-open.data.gov.sg/v2/real-time/api/rainfall');
+      const json = await response.json();
+
+      const stations = json.data.stations;
+      const readings = json.data.readings?.[0]?.data || [];
+      const readingTimestamp = json.data.readings?.[0]?.timestamp;
+      setTimestamp(readingTimestamp);
+
+      const totalRain = readings.reduce((sum, reading) => sum + (reading.value || 0), 0);
+
+      if (totalRain > 0) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Rainfall Alert',
+            body: `It's currently raining in your area.`,
+          },
+          trigger: { seconds: 1800, repeats: true }, // every 30 minutes
+        });
+      } else {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'No Rain Detected',
+            body: 'Skies are clear at the moment.',
+          },
+          trigger: { seconds: 1800, repeats: true }, // every 30 minutes
+        });
+      }
+
+      const merged = stations.map((station) => {
+        const reading = readings.find((r) => r.station_id === station.id);
+        return {
+          id: station.id,
+          name: station.name,
+          labelLocation: station.location,
+          value: reading?.value ?? 0,
+        };
+      });
+
+      setWeatherData(merged);
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
+  };
 
   const getColor = (value) => {
     if (value > 20) return 'red';
@@ -94,7 +102,15 @@ const WeatherAPI = ({ mapStyle }) => {
     return 'green';
   };
 
-  if (!location) return <ActivityIndicator style={{ flex: 1 }} size="large" />;
+  if (loading) return <Text>Loading…</Text>;
+
+  if (!permissionGranted) {
+    return <Text>Location permission not granted</Text>;
+  }
+
+  if (!location) {
+    return <ActivityIndicator style={{ flex: 1 }} size="large" />;
+  }
 
   const customPins = [
     {
@@ -110,7 +126,7 @@ const WeatherAPI = ({ mapStyle }) => {
     {
       id: 'flood3',
       name: 'Bedok North Ave 4',
-      coords: { latitude: 1.334774 , longitude: 103.943387 },
+      coords: { latitude: 1.334774, longitude: 103.943387 },
     },
     {
       id: 'flood4',
@@ -277,10 +293,10 @@ const WeatherAPI = ({ mapStyle }) => {
       </MapView>
 
       <View style={styles.legend}>
-        <Text style={{color: 'black'}}><FontAwesome5 name="square-full" size={16} style={{ color: 'green' }}/> Low/No Rainfall</Text>
-        <Text style={{ color: 'black' }}><FontAwesome5 name="square-full" size={16} style={{ color: 'orange' }}/> Moderate Rainfall</Text>
-        <Text style={{ color: 'black' }}><FontAwesome5 name="square-full" size={16} style={{ color: 'red' }}/> Heavy Rainfall</Text>
-        <Text><FontAwesome5 name="exclamation-triangle" size={16}/> Flood Hotspot (as of 14 May 2025)</Text>
+        <Text style={{ color: 'black' }}><FontAwesome5 name="square-full" size={16} style={{ color: 'green' }} /> Low/No Rainfall</Text>
+        <Text style={{ color: 'black' }}><FontAwesome5 name="square-full" size={16} style={{ color: 'orange' }} /> Moderate Rainfall</Text>
+        <Text style={{ color: 'black' }}><FontAwesome5 name="square-full" size={16} style={{ color: 'red' }} /> Heavy Rainfall</Text>
+        <Text><FontAwesome5 name="exclamation-triangle" size={16} /> Flood Hotspot (as of 14 May 2025)</Text>
         <Text style={{ marginTop: 4, fontSize: 12 }}>
           Last updated: {timestamp ? new Date(timestamp).toLocaleString('en-SG') : 'Loading...'}
         </Text>
