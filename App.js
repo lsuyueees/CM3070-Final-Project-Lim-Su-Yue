@@ -9,6 +9,7 @@ import { auth, db } from './firebaseConfig';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import MoreStackNavigation from './jsFiles/moreStackNavigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import AuthScreen from './jsFiles/authentication';
 import WeatherAPI from './jsFiles/weatherAPI';
@@ -18,6 +19,14 @@ import ScenarioQuiz from './jsFiles/scenarioQuiz';
 import MoreMenu from './jsFiles/more';
 import Profile from './jsFiles/profile';
 import QuizStackNavigation from './jsFiles/quizStackNavigation';
+
+// // Clear cache once
+// // 1. Uncomment lines 27-29 and run npm start
+// // 2. After running, terminate program and comment lines 27-29
+// // 3. Run npm start again and use the app as per normal
+// AsyncStorage.removeItem('savedEmail')
+//   .then(() => console.log('Saved email cleared!'))
+//   .catch((e) => console.log('Error clearing saved email:', e));
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -78,17 +87,6 @@ function MyTabs() {
           )
         }}
       />
-      {/* <Tab.Screen 
-        name="Learn" 
-        component={LearnScreen}
-        options={{
-            lazy: false,
-            tabBarLabel: 'Learn', 
-            tabBarIcon: ({ color }) => (
-              <FontAwesome5 name="book-reader" size={20} style={{ color }} />
-            )
-          }} 
-        /> */}
       <Tab.Screen
         name="Learn"
         component={QuizStackNavigation}
@@ -101,17 +99,6 @@ function MyTabs() {
           )
         }}
       />
-      {/* <Tab.Screen 
-        name="More" 
-        component={MoreScreen}
-        options={{
-            lazy: false,
-            tabBarLabel: 'More', 
-            tabBarIcon: ({ color }) => (
-              <FontAwesome5 name="ellipsis-h" size={20} style={{ color }} />
-            )
-          }} 
-        /> */}
       <Tab.Screen
         name="More"
         component={MoreStackNavigation}
@@ -176,44 +163,9 @@ function MoreScreen() {
   );
 }
 
-// export const setupDatabase = () => {
-//   db.transaction(tx => {
-//     tx.executeSql(
-//       `CREATE TABLE IF NOT EXISTS quizzes (
-//         id TEXT PRIMARY KEY NOT NULL,
-//         completed INTEGER,
-//         score INTEGER
-//       );`
-//     );
-
-//     tx.executeSql(
-//       `CREATE TABLE IF NOT EXISTS achievements (
-//         id TEXT PRIMARY KEY NOT NULL,
-//         title TEXT
-//       );`
-//     );
-
-//     tx.executeSql(
-//       `CREATE TABLE IF NOT EXISTS checklist (
-//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-//         item TEXT,
-//         completed INTEGER
-//       );`
-//     );
-
-//     tx.executeSql(
-//       `CREATE TABLE IF NOT EXISTS notification_settings (
-//         id TEXT PRIMARY KEY NOT NULL,
-//         alertsEnabled INTEGER
-//       );`
-//     );
-//   });
-// };
-
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async(user) => {
@@ -244,7 +196,6 @@ export default function App() {
           console.log('Ensure user doc error:', e);
         }
       }
-
     });
 
     return () => unsubscribe();
