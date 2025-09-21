@@ -32,13 +32,11 @@ const Quiz1 = () => {
     const ref = doc(db, 'users', user.uid);
 
     try {
-      // ensure user doc (safe if exists)
       const snap = await getDoc(ref);
       if (!snap.exists()) {
         await setDoc(ref, { email: user.email ?? '', createdAt: serverTimestamp() }, { merge: true });
       }
 
-      // strict unlocking: set true only if correct, false otherwise
       await setDoc(
         ref,
         { quiz1: isCorrect, quiz1Score: isCorrect ? 1 : 0 },

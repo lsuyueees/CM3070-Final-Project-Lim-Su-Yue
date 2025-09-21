@@ -1,4 +1,3 @@
-// Quiz4.js
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -33,13 +32,11 @@ const Quiz4 = () => {
         const ref = doc(db, 'users', user.uid);
 
         try {
-            // ensure user doc (safe if exists)
             const snap = await getDoc(ref);
             if (!snap.exists()) {
                 await setDoc(ref, { email: user.email ?? '', createdAt: serverTimestamp() }, { merge: true });
             }
 
-            // strict unlocking: set true only if correct, false otherwise
             await setDoc(
                 ref,
                 { quiz4: isCorrect, quiz4Score: isCorrect ? 1 : 0 },
