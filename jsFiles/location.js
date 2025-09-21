@@ -1,4 +1,3 @@
-// location.js
 import { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import { AppState } from 'react-native';
@@ -10,7 +9,6 @@ export function userLocation() {
 
   const requestAndFetch = async () => {
     try {
-      // First check existing permission
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== 'granted') {
         const res = await Location.requestForegroundPermissionsAsync();
@@ -22,7 +20,6 @@ export function userLocation() {
       }
       setPermissionGranted(true);
 
-      // Get the coordinates
       const loc = await Location.getCurrentPositionAsync({});
       setLocation(loc.coords);
     } catch (e) {
@@ -35,8 +32,6 @@ export function userLocation() {
 
   useEffect(() => {
     requestAndFetch();
-
-    // Optional: re-check when app comes back from background
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         requestAndFetch();

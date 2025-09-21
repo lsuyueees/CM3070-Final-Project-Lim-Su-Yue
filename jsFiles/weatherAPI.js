@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { StyleSheet, Text, View, ActivityIndicator, Button } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator, Button, RefreshControl } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
@@ -23,78 +23,69 @@ const WeatherAPI = ({ mapStyle, refreshTrigger }) => {
   const [weatherData, setWeatherData] = useState([]);
   const [timestamp, setTimestamp] = useState(null);
 
-  useEffect(() => {
-    // (async () => {
-    //   const { status } = await Location.requestForegroundPermissionsAsync();
-    //   if (status !== 'granted') {
-    //     alert('Permission to access location was denied');
-    //     return;
-    //   }
+  const noti_Timing = 30 * 60 * 1000; // 30 mins
+  const lastNotifyRef = useRef(0);
 
-    //   const loc = await Location.getCurrentPositionAsync({});
-    //   setLocation(loc.coords);
-    // })();
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+
+        const response = await fetch('https://api-open.data.gov.sg/v2/real-time/api/rainfall');
+        const json = await response.json();
+
+        const stations = json.data.stations;
+        const readings = json.data.readings?.[0]?.data || [];
+        const readingTimestamp = json.data.readings?.[0]?.timestamp;
+        setTimestamp(readingTimestamp);
+
+        const totalRain = readings.reduce((sum, reading) => sum + (reading.value || 0), 0);
+        const isRaining = totalRain > 0;
+
+        let alertsEnabled = false;
+        if (user) {
+          const snap = await getDoc(doc(db, 'users', user.uid));
+          alertsEnabled = !!snap.data()?.alertsEnabled;
+        }
+        if (alertsEnabled) {
+          const now = Date.now();
+          if (now - lastNotifyRef.current >= noti_Timing) {
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: isRaining ? 'Rainfall Alert' : 'No Rain Detected',
+                body: isRaining ? 'It is currently raining in your area.' : 'Skies are clear at the moment.',
+              },
+              trigger: null,
+            });
+            lastNotifyRef.current = now;
+          }
+        }
+
+        const merged = stations.map((station) => {
+          const reading = readings.find((r) => r.station_id === station.id);
+          return {
+            id: station.id,
+            name: station.name,
+            labelLocation: station.location,
+            value: reading?.value ?? 0,
+          };
+        });
+
+        setWeatherData(merged);
+      } catch (error) {
+        console.error('Error fetching weather data:', error);
+      }
+    };
 
     fetchWeather();
     const interval = setInterval(fetchWeather, 60000); // Re-fetch every 60 seconds
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval);
   }, [refreshTrigger, location]);
-
-  const fetchWeather = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const userRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userRef);
-      const alertsEnabled = userDoc.exists() && userDoc.data().alertsEnabled;
-
-      if (!alertsEnabled) return; // STOP if toggle is off
-
-      const response = await fetch('https://api-open.data.gov.sg/v2/real-time/api/rainfall');
-      const json = await response.json();
-
-      const stations = json.data.stations;
-      const readings = json.data.readings?.[0]?.data || [];
-      const readingTimestamp = json.data.readings?.[0]?.timestamp;
-      setTimestamp(readingTimestamp);
-
-      const totalRain = readings.reduce((sum, reading) => sum + (reading.value || 0), 0);
-
-      if (totalRain > 0) {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Rainfall Alert',
-            body: `It's currently raining in your area.`,
-          },
-          trigger: { seconds: 1800, repeats: true }, // every 30 minutes
-        });
-      } else {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'No Rain Detected',
-            body: 'Skies are clear at the moment.',
-          },
-          trigger: { seconds: 1800, repeats: true }, // every 30 minutes
-        });
-      }
-
-      const merged = stations.map((station) => {
-        const reading = readings.find((r) => r.station_id === station.id);
-        return {
-          id: station.id,
-          name: station.name,
-          labelLocation: station.location,
-          value: reading?.value ?? 0,
-        };
-      });
-
-      setWeatherData(merged);
-    } catch (error) {
-      console.error('Error fetching weather data:', error);
-    }
-  };
 
   const getColor = (value) => {
     if (value > 20) return 'red';

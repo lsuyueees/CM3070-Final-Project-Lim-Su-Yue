@@ -13,7 +13,6 @@ export default function AuthScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
 
-  // Load saved email on mount
   useEffect(() => {
     const loadEmail = async () => {
       const savedEmail = await AsyncStorage.getItem('savedEmail');
@@ -25,27 +24,37 @@ export default function AuthScreen({ navigation }) {
   }, []);
 
   const handleAuth = async () => {
+    const emailTrimmed = email.trim();
+    const passwordTrimmed = password.trim();
+
+    if (!emailTrimmed || !passwordTrimmed) {
+      Alert.alert('Error', 'Please enter both email and password.');
+      return;
+    }
+
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        await AsyncStorage.setItem('savedEmail', email); // Save email for next time
+        const cred = await signInWithEmailAndPassword(auth, emailTrimmed, passwordTrimmed);
+        await AsyncStorage.setItem('savedEmail', cred.user.email ?? emailTrimmed); // Save email for next time
         Alert.alert('Success', 'Logged in!');
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const cred = createUserWithEmailAndPassword(auth, emailTrimmed, passwordTrimmed);
 
-        await setDoc(doc(db, 'users', user.uid), {
-          email: cred.user.email ?? '',
-          username: '',
-          quiz1: false, quiz1Score: 0,
-          quiz2: false, quiz2Score: 0,
-          quiz3: false, quiz3Score: 0,
-          quiz4: false, quiz4Score: 0,
-          alertsEnabled: false,
-          checklist: {},
-          createdAt: serverTimestamp(),
-          lastLoginAt: serverTimestamp(),
-        }, { merge: true });
-
+        try {
+          await setDoc(doc(db, 'users', cred.user.uid), {
+            email: cred.user.email ?? '',
+            username: '',
+            quiz1: false, quiz1Score: 0,
+            quiz2: false, quiz2Score: 0,
+            quiz3: false, quiz3Score: 0,
+            quiz4: false, quiz4Score: 0,
+            alertsEnabled: false,
+            checklist: {},
+          }, { merge: true });
+        } catch (error) {
+          Alert.alert('Account created');
+          return;
+        }
         Alert.alert('Success', 'Account created!');
       }
     } catch (error) {
@@ -95,14 +104,6 @@ export default function AuthScreen({ navigation }) {
   );
 };
 
-// return (
-//   <View>
-//     <Text>Login Screen</Text>
-//     <Button title="Login" onPress={() => navigation.replace('Main')} />
-//   </View>
-// );
-//}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -148,5 +149,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-
 });

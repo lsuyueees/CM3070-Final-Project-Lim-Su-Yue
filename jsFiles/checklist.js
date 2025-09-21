@@ -35,7 +35,6 @@ const Checklist = () => {
         const ref = doc(db, 'users', user.uid);
         const snap = await getDoc(ref);
 
-        // defaults: every predefined key set to false
         const defaults = checklistItems.reduce((acc, item) => {
           acc[item.key] = false;
           return acc;
@@ -45,12 +44,10 @@ const Checklist = () => {
         const merged = { ...defaults, ...cloud };
 
         if (alive) setChecklist(merged);
-
-        // If user doc exists but checklist field missing, initialize it once
+        
         if (snap.exists() && !snap.data().checklist) {
           await setDoc(ref, { checklist: merged }, { merge: true });
         }
-        // If user doc doesn't exist at all, this will create it with checklist
         if (!snap.exists()) {
           await setDoc(ref, { checklist: merged }, { merge: true });
         }
@@ -68,7 +65,7 @@ const Checklist = () => {
     if (!checklist) return;
 
     const updated = { ...checklist, [key]: !checklist[key] };
-    setChecklist(updated); // optimistic UI
+    setChecklist(updated);
 
     try {
       const user = auth.currentUser;
@@ -76,8 +73,6 @@ const Checklist = () => {
       await setDoc(doc(db, 'users', user.uid), { checklist: updated }, { merge: true });
     } catch (e) {
       console.log('Checklist save error:', e);
-      // Optional: rollback UI if needed
-      // setChecklist(checklist);
     }
   };
 

@@ -8,7 +8,6 @@ const NotificationOption = () => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Configure handler once (optional; can be elsewhere)
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -35,7 +34,6 @@ const NotificationOption = () => {
         const ref = doc(db, 'users', user.uid);
         const snap = await getDoc(ref);
 
-        // If field missing, treat as false (do NOT write anything)
         const enabled = snap.exists() ? !!snap.data().alertsEnabled : false;
         if (alive) setIsEnabled(enabled);
       } catch (e) {
@@ -65,37 +63,31 @@ const NotificationOption = () => {
       return;
     }
 
-    const nextValue = !isEnabled; // flip
-
-    // Optimistic UI
+    const nextValue = !isEnabled; 
     setIsEnabled(nextValue);
 
     try {
       if (nextValue) {
-        // Turning ON: ask permission only now
         const ok = await requestPushPermission();
         if (!ok) {
-          setIsEnabled(false); // revert
+          setIsEnabled(false);
           Alert.alert('Permission needed', 'Enable notifications in Settings to receive alerts.');
           return;
         }
 
         await setDoc(doc(db, 'users', user.uid), { alertsEnabled: true }, { merge: true });
 
-        // Optional small confirmation (local) – remove if you prefer silence
         await Notifications.scheduleNotificationAsync({
           content: { title: 'Weather Alerts Enabled', body: 'You will now receive rainfall alerts.' },
           trigger: null,
         });
       } else {
-        // Turning OFF
         await setDoc(doc(db, 'users', user.uid), { alertsEnabled: false }, { merge: true });
-        // Optional: cancel any scheduled local notifications
         try { await Notifications.cancelAllScheduledNotificationsAsync(); } catch { }
       }
     } catch (e) {
       console.log('Toggle alertsEnabled error:', e);
-      setIsEnabled(!nextValue); // rollback on error
+      setIsEnabled(!nextValue);
       Alert.alert('Error', 'Could not update notification setting. Please try again.');
     }
   };

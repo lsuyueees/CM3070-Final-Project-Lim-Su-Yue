@@ -7,7 +7,6 @@ const SOSList = () => {
 
   const onRefresh = () => {
     setRefreshing(true);
-    // Add your refresh logic here (e.g. fetch data again)
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
@@ -156,7 +155,6 @@ const SOSList = () => {
         <View style={{ borderBottomWidth: 1, borderColor: '#ccc', marginVertical: 10 }} />
 
         <View style={styles.safetyList}>
-
           <View style={styles.card}>
             <View style={styles.header}>
               <FontAwesome5 name="cloud-showers-heavy" size={20} color="#0072A3" style={{ marginRight: 8 }} />
@@ -164,7 +162,7 @@ const SOSList = () => {
             </View>
             <Text style={styles.tip}>Stay indoors and away from windows</Text>
             <Text style={styles.tip}>Unplug electrical appliances</Text>
-            <Text style={styles.tip}>Avoid using elevators — use stairs</Text>
+            <Text style={styles.tip}>Avoid using elevators, and use stairs instead</Text>
             <Text style={styles.tip}>Do not go outdoors unless necessary</Text>
           </View>
 
@@ -176,7 +174,7 @@ const SOSList = () => {
             <Text style={styles.tip}>Do not walk or drive through floodwaters</Text>
             <Text style={styles.tip}>Stay away from rivers, canals, and drains</Text>
             <Text style={styles.tip}>Avoid contact with contaminated floodwater</Text>
-            <Text style={styles.tip}>Prepare an emergency go-bag</Text>
+            <Text style={styles.tip}>Prepare an emergency bag</Text>
           </View>
 
           <View style={styles.card}>
@@ -200,10 +198,7 @@ const SOSList = () => {
             <Text style={styles.tip}>Create an evacuation plan</Text>
             <Text style={styles.tip}>Check for updates from Singapore's news platforms</Text>
           </View>
-
-          
         </View>
-
       </ScrollView>
     </View >
   );

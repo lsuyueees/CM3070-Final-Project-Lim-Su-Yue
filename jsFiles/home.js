@@ -15,7 +15,7 @@ const Home = () => {
 
   const onRefresh = () => {
     setRefreshing(true);
-    setRefreshTrigger(prev => !prev);  // Toggle value to force refresh in child components
+    setRefreshTrigger(prev => !prev);
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
