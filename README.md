@@ -1,3 +1,6 @@
+1ReadySG is a mobile application developed to help users in Singapore prepare for disasters (flood) through safety guides and engaging quizzes and provide all essential contact information in a one-stop solution.
+
+
 Install dependencies: npm install \
 Run this code if any dependies issues: npx expo install --fix 
 
