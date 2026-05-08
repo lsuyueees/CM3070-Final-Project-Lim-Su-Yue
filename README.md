@@ -9,7 +9,7 @@ https://www.figma.com/design/lk61O0tfcKwsJ1oBUldPY4/Wireframe-for-1ReadySG?t=28m
 All images are stored in the [images folder](images/).
 
 ### Dashboard
-![Home Page 1](images/HomeTabUp.png) ![Home Page 1](images/HomeTabDown.png) 
+![Home Page 1](images/Home%20Tab%20Up.png) ![Home Page 2](images/Home%20Tab%20Down.png) 
 
 
 
