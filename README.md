@@ -1,7 +1,19 @@
 1ReadySG is a mobile application developed to help users in Singapore prepare for disasters (flood) through safety guides and engaging quizzes and provide all essential contact information in a one-stop solution.
 
-Figma Wireframe: https://www.figma.com/design/lk61O0tfcKwsJ1oBUldPY4/Wireframe-for-1ReadySG?t=28mLPHeTGOJr82Lg-1
+## Figma Wireframe
+https://www.figma.com/design/lk61O0tfcKwsJ1oBUldPY4/Wireframe-for-1ReadySG?t=28mLPHeTGOJr82Lg-1
 
+
+## Screenshots
+
+All images are stored in the [images folder](images/).
+
+### Dashboard
+![Home Page 1](images/HomeTabUp.png) ![Home Page 1](images/HomeTabDown.png) 
+
+
+
+## Run Instructions
 Install dependencies: npm install \
 Run this code if any dependies issues: npx expo install --fix 
 
