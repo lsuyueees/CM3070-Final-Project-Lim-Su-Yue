@@ -8,13 +8,13 @@ https://www.figma.com/design/lk61O0tfcKwsJ1oBUldPY4/Wireframe-for-1ReadySG?t=28m
 ## Screenshots
 All images are stored in the [images folder](images/).
 
-[Sign Up Page](images/Sign%20Up%20Page.jpg)
-[Login Page](images/Login%20Page.jpg)
-[Home Tab Up](images/Home%20Tab%20Up.jpg) [Home Tab Down](images/Home%20Tab%20Down.jpg) 
-[Weather Tab](images/Weather%20Map.jpg)
-[SOS Tab Up](images/SOS.jpg) [SOS Tab Down](images/Safety%20Guides.jpg)
-[Learn Tab](images/Learn%20Tab.jpg)
-[More Tab](images/More%20Tab.jpg)
+[Sign Up Page](images/Sign%20Up%20Page.jpg) <br>
+[Login Page](images/Login%20Page.jpg) <br>
+[Home Tab Up](images/Home%20Tab%20Up.jpg) [Home Tab Down](images/Home%20Tab%20Down.jpg) <br>
+[Weather Tab](images/Weather%20Map.jpg) <br>
+[SOS Tab Up](images/SOS.jpg) [SOS Tab Down](images/Safety%20Guides.jpg) <br>
+[Learn Tab](images/Learn%20Tab.jpg) <br>
+[More Tab](images/More%20Tab.jpg) <br>
 
 
 ## Run Instructions
