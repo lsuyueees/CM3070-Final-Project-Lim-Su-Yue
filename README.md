@@ -2,9 +2,9 @@
 
 
 ## Figma Wireframe
-https://www.figma.com/design/lk61O0tfcKwsJ1oBUldPY4/Wireframe-for-1ReadySG?t=28mLPHeTGOJr82Lg-1  <br>
-
-
+https://www.figma.com/design/lk61O0tfcKwsJ1oBUldPY4/Wireframe-for-1ReadySG?t=28mLPHeTGOJr82Lg-1 
+<br>
+<br>
 ## Screenshots
 All images are stored in the [images folder](images/).
 
@@ -15,8 +15,12 @@ All images are stored in the [images folder](images/).
 [SOS Tab Up](images/SOS.jpg) [SOS Tab Down](images/Safety%20Guides.jpg) <br>
 [Learn Tab](images/Learn%20Tab.jpg) <br>
 [More Tab](images/More%20Tab.jpg) <br>
-
-
+<br>
+<br>
+## Demo Video
+https://www.youtube.com/watch?v=-dlfKdArmiQ
+<br>
+<br>
 ## Run Instructions
 Install dependencies: npm install \
 Run this code if any dependies issues: npx expo install --fix 
